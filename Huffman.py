@@ -25,7 +25,6 @@ class Huffman:
         self.huff_dic = huff_dic
         self.padding = padding
         self.fre_dic = {}
-        self.huff_dic = {}
 
     @staticmethod
     def _int2bytes(n: int) -> bytes:  # maybe no need for such a special function
@@ -35,6 +34,24 @@ class Huffman:
         :return bytes_n : bytes
         """
         return bytes([n])  # 将acs码值转化为bytes串
+
+    @classmethod
+    def rebuild(cls, v_lst, l_lst) -> dict:
+        """
+        rebuild the huffman tree
+        :param v_lst: the list of char
+        :param l_lst: the list of code length
+        :return: re_huff_dic: the huffman tree
+        """
+        re_huff_dic = {value: '' for value in v_lst}
+        pre = 0
+        for i in range(len(v_lst)):
+            if i == 0:
+                pre = 0
+            else:
+                pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])  # 核心构建思路，同一层就靠加，不同层就要左移对应位数
+            re_huff_dic[v_lst[i]] = bin(pre)[2:].rjust(l_lst[i], '0')  # 以零来填充不满的位数
+        return re_huff_dic
 
     def _fre_count(self):
         """
@@ -138,13 +155,11 @@ class Huffman:
 
         bin_buffer = ''
         self.padding = 0
-        dic = [self._int2bytes(i) for i in range(256)]
-        read_buffer = [dic[i] for i in self.str_file]
         # 直接查找写入
         write_buffer = bytearray([])
         # 循环读入数据，同时编码输出
-        for item in read_buffer:
-            bin_buffer = bin_buffer + self.huff_dic[item]
+        for item in self.str_file:
+            bin_buffer = bin_buffer + self.huff_dic[bytes([item])]
             while len(bin_buffer) >= 8:
                 write_buffer.append(int(bin_buffer[:8], 2))
                 bin_buffer = bin_buffer[8:]
@@ -186,7 +201,7 @@ class Huffman:
                 else:
                     current = current.l_child
                 # 到达叶结点，打印字符并重置current
-                if current.l_child is None and current.rchild is None:
+                if current.l_child is None and current.r_child is None:
                     write_buffer.extend(current.value)
                     current = node_lst[0]
 

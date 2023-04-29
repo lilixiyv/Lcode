@@ -1,6 +1,6 @@
 import sys
 import argparse
-from En_De_code import encode
+from En_De_code import encode, decode
 sys.dont_write_bytecode = True
 
 parser = argparse.ArgumentParser(
@@ -39,7 +39,10 @@ try:
     if args.Huffman:
         if args.compress:
             encode(args.input, args.output)
-            print("\nthe {}has been compressed to {} with Huffman coding".format(args.input, args.output))
+            print("\033[0;32m \nthe {} has been compressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
+        if args.decompress:
+            res = decode(args.input, args.output)
+            print("\033[0;32m\nthe {} has been decompressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
 
 except Exception as e:
     print(f"\033[0;31m [Lcode Error]{e}\033[0m")

@@ -14,7 +14,7 @@ def encode(source_path, target_path):
     with open(source_path, 'rb') as fp_in:
         with open(target_path, 'wb') as fp_out:
             str_file = fp_in.read()
-            if not str_file:
+            if not str_file:  # 若为空文件，直接返回空文件
                 return
             huffman = Huffman(str_file)
 
@@ -30,10 +30,10 @@ def encode(source_path, target_path):
             if length_lst[max_length] == 256:
                 length_lst[max_length] = 0
             length_lst.pop(0)  # 码长为0的字符并不存在，故删去
-            code_bytes = b''.join(huff_dic.keys())
-            length_bytes = b''.join(map(int2bytes, length_lst))
-            code_data = int2bytes(max_length) + length_bytes + code_bytes
-            write_buffer = int2bytes(padding) + code_data + write_buffer
+            code_bytes = b''.join(huff_dic.keys())  # 将所有字符按顺序（码长）存储
+            length_bytes = b''.join(map(int2bytes, length_lst))  # 从码长为1开始，存每个码长对应的同码长字符数
+            code_data = bytes([max_length]) + length_bytes + code_bytes
+            write_buffer = bytes([padding]) + code_data + write_buffer
             write_buffer = b'lxy' + write_buffer
 
             fp_out.write(write_buffer)
@@ -61,10 +61,11 @@ def decode(source_path, target_path):
                 # 计算出还原huffman码表所需的信息
                 char_lst, length_lst = [], []
                 for pos in range(2 + max_length, 2 + max_length + char_num):
-                    char_lst.append(int2bytes(buffer[pos]))
+                    char_lst.append(bytes([buffer[pos]]))
                 for i in range(max_length):
                     length_lst.extend([i + 1] * length[i])
-                code_dic = huffman.rebuilt(char_lst, length_lst)
+                huff_dic = Huffman.rebuild(char_lst, length_lst)
                 str_bytes = buffer[2 + max_length + char_num:]
-                write_buffer = huffman.decode(str_bytes, code_dic, padding)
+                huffman = Huffman(str_bytes, huff_dic, padding)
+                write_buffer = huffman.decode()
                 fp_out.write(write_buffer)
