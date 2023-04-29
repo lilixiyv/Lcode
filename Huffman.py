@@ -14,16 +14,14 @@ class Huffman:
     when decoding, need str, code tree, padding; call the function "decode".
     """
 
-    def __init__(self, str_file, huff_dic=None, padding=None):
+    def __init__(self, str_file, huff_dic=None):
         """
         build the parameter needed in Huffman code
         :param str_file: bytes; the data to deal with;
         :param huff_dic:
-        :param padding:
         """
         self.str_file = str_file
         self.huff_dic = huff_dic
-        self.padding = padding
         self.fre_dic = {}
 
     @staticmethod
@@ -154,7 +152,6 @@ class Huffman:
         self.stand_huff()
 
         bin_buffer = ''
-        self.padding = 0
         # 直接查找写入
         write_buffer = bytearray([])
         # 循环读入数据，同时编码输出
@@ -164,12 +161,12 @@ class Huffman:
                 write_buffer.append(int(bin_buffer[:8], 2))
                 bin_buffer = bin_buffer[8:]
         # 将缓冲区内的数据填充后输出
-        if bin_buffer:
-            self.padding = 8 - len(bin_buffer)  # 不够了就要补
-            bin_buffer = bin_buffer.ljust(8, '0')
-            write_buffer.append(int(bin_buffer, 2))
+        # 在最后一个字节使用一个1和若干0填充
+        bin_buffer += '1'
+        bin_buffer = bin_buffer.ljust(8, '0')
+        write_buffer.append(int(bin_buffer, 2))
 
-        return bytes(write_buffer), self.huff_dic, self.padding
+        return bytes(write_buffer), self.huff_dic
 
     def decode(self):
         if not self.huff_dic:  # 空字典，直接返回
@@ -190,8 +187,14 @@ class Huffman:
         for i in self.str_file:
             read_buffer.extend(dic[i])
             buffer_size = buffer_size + 8
-        read_buffer = read_buffer[0: buffer_size - self.padding]
-        buffer_size = buffer_size - self.padding  # 得到字符串二进制长度以及二进制串
+        padding_len = 1
+        for i in read_buffer[::-1]:
+            if i != 1:
+                padding_len += 1
+            else:
+                break
+        read_buffer = read_buffer[0: buffer_size - padding_len]
+        buffer_size = buffer_size - padding_len  # 得到字符串二进制长度以及二进制串
         write_buffer = bytearray([])
         current = node_lst[0]
         for pos in range(0, buffer_size, 8):

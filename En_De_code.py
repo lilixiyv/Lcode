@@ -18,7 +18,7 @@ def encode(source_path, target_path):
                 return
             huffman = Huffman(str_file)
 
-            write_buffer, huff_dic, padding = huffman.encode()
+            write_buffer, huff_dic = huffman.encode()
 
             max_length = 0
             for code in huff_dic.values():
@@ -33,7 +33,7 @@ def encode(source_path, target_path):
             code_bytes = b''.join(huff_dic.keys())  # 将所有字符按顺序（码长）存储
             length_bytes = b''.join(map(int2bytes, length_lst))  # 从码长为1开始，存每个码长对应的同码长字符数
             code_data = bytes([max_length]) + length_bytes + code_bytes
-            write_buffer = bytes([padding]) + code_data + write_buffer
+            write_buffer = code_data + write_buffer
             write_buffer = b'lxy' + write_buffer
 
             fp_out.write(write_buffer)
@@ -50,9 +50,8 @@ def decode(source_path, target_path):
             if my_file != b'lxy':
                 return -1
             else:
-                padding = buffer[0]
-                max_length = buffer[1]
-                length = list(buffer[2:2 + max_length:])
+                max_length = buffer[0]
+                length = list(buffer[1:1 + max_length:])
                 char_num = sum(length)  # 求层数
                 # 如果length全零，那么表示256个字符全在同一层
                 if char_num == 0 and max_length != 0:
@@ -60,12 +59,12 @@ def decode(source_path, target_path):
                     length[max_length - 1] = 256
                 # 计算出还原huffman码表所需的信息
                 char_lst, length_lst = [], []
-                for pos in range(2 + max_length, 2 + max_length + char_num):
+                for pos in range(1 + max_length, 1 + max_length + char_num):
                     char_lst.append(bytes([buffer[pos]]))
                 for i in range(max_length):
                     length_lst.extend([i + 1] * length[i])
                 huff_dic = Huffman.rebuild(char_lst, length_lst)
-                str_bytes = buffer[2 + max_length + char_num:]
-                huffman = Huffman(str_bytes, huff_dic, padding)
+                str_bytes = buffer[1 + max_length + char_num:]
+                huffman = Huffman(str_bytes, huff_dic)
                 write_buffer = huffman.decode()
                 fp_out.write(write_buffer)
