@@ -24,15 +24,6 @@ class Huffman:
         self.huff_dic = huff_dic
         self.fre_dic = {}
 
-    @staticmethod
-    def _int2bytes(n: int) -> bytes:  # maybe no need for such a special function
-        """
-        turn a number (which is the ASCII code of a character) to bytes
-        :param n: int
-        :return bytes_n : bytes
-        """
-        return bytes([n])  # 将acs码值转化为bytes串
-
     @classmethod
     def rebuild(cls, v_lst, l_lst) -> dict:
         """
@@ -61,7 +52,7 @@ class Huffman:
             cha_fre[item] += 1
         for i in range(256):
             if cha_fre[i] != 0:  # 非0才有统计必要
-                self.fre_dic[Huffman._int2bytes(i)] = cha_fre[i]
+                self.fre_dic[bytes([i])] = cha_fre[i]
 
     def _tree_build(self):
         """
@@ -84,26 +75,15 @@ class Huffman:
                     rec_code(pre.r_child, code + '1')
 
         self._fre_count()
-        if not self.fre_dic:  # 没有字符的情况；不能确定正确性。
+        if not self.fre_dic:  # 没有字符的情况；
             return
-        elif len(self.fre_dic) == 1:  # 仅有一个字符； 不能确定正确性。
+        elif len(self.fre_dic) == 1:  # 仅有一个字符；
             for value in self.fre_dic.keys():
                 self.huff_dic[value] = '0'
             return
         h_lst = [HNode(value, weight, None, None) for value, weight in self.fre_dic.items()]
         h_lst.sort(key=lambda x: x.weight, reverse=True)  # 降序排序，方便插入
 
-        # 合并节点，构建树
-        # while len(h_lst) > 1:
-        #     node2 = h_lst.pop()  # min
-        #     node1 = h_lst.pop()  # max
-        #     tmp = HNode(None, node1.weight + node2.weight, node1, node2)
-        #     h_lst.append(tmp)
-        #     index = len(h_lst) - 1
-        #     while index and h_lst[index - 1].weight <= tmp.weight:
-        #         h_lst[index] = h_lst[index - 1]
-        #         index -= 1
-        #     h_lst[index] = tmp
         len_h_lst = len(h_lst)
         while len_h_lst > 1:
             node2 = h_lst.pop()
@@ -146,7 +126,7 @@ class Huffman:
     def encode(self):
         """
         encode: one of the main function of Huffman;
-        :return:
+        :return: the data of the result of decompression and the huffman dictionary
         """
         self._tree_build()
         self.stand_huff()

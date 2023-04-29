@@ -43,6 +43,9 @@ try:
             print("\033[0;32m \nthe {} has been compressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
         if args.decompress:
             res = decode(args.input, args.output)
+            if res == -1:
+                print("\033[0;33m\nthe file is not compressed with Lcode!\033[0m".format(args.input, args.output))
+                exit(0)
             print("\033[0;32m\nthe {} has been decompressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
     if args.hash_test:
         test(args.hash_test[0], args.hash_test[1])

@@ -1,15 +1,6 @@
 from Huffman import Huffman
 
 
-def int2bytes(n: int) -> bytes:  # maybe no need for such a special function
-    """
-    turn a number (which is the ASCII code of a character) to bytes
-    :param n: int
-    :return bytes_n : bytes
-    """
-    return bytes([n])  # 将acs码值转化为bytes串
-
-
 def encode(source_path, target_path):
     with open(source_path, 'rb') as fp_in:
         with open(target_path, 'wb') as fp_out:
@@ -31,7 +22,7 @@ def encode(source_path, target_path):
                 length_lst[max_length] = 0
             length_lst.pop(0)  # 码长为0的字符并不存在，故删去
             code_bytes = b''.join(huff_dic.keys())  # 将所有字符按顺序（码长）存储
-            length_bytes = b''.join(map(int2bytes, length_lst))  # 从码长为1开始，存每个码长对应的同码长字符数
+            length_bytes = b''.join(map(lambda x: bytes([x]), length_lst))  # 从码长为1开始，存每个码长对应的同码长字符数
             code_data = bytes([max_length]) + length_bytes + code_bytes
             write_buffer = code_data + write_buffer
             write_buffer = b'lxy' + write_buffer
