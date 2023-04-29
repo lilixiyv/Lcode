@@ -1,7 +1,6 @@
 class HNode:
     def __init__(self, value, weight, l_child, r_child):
         self.value = value
-        self.value = value
         self.weight = weight
         self.l_child = l_child
         self.r_child = r_child
@@ -27,7 +26,7 @@ class Huffman:
     @classmethod
     def rebuild(cls, v_lst, l_lst) -> dict:
         """
-        rebuild the huffman tree
+        rebuild the stand huffman dic
         :param v_lst: the list of char
         :param l_lst: the list of code length
         :return: re_huff_dic: the huffman tree
@@ -153,7 +152,7 @@ class Huffman:
             return b''
         elif len(self.huff_dic) == 1:  # 字典长度为1，为了保证鲁棒性添加冗余
             self.huff_dic[b'lxy'] = 'lxy'
-        node_lst = [HNode(value, weight, None, None) for value, weight in self.huff_dic.items()]
+        node_lst = [HNode(value, weight, None, None) for value, weight in self.huff_dic.items()]  # value 为字符值， weight 为编码
         node_lst.sort(key=lambda x: (len(x.weight), x.weight), reverse=False)
         # 根据信息恢复码树
         while len(node_lst) > 1:

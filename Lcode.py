@@ -1,13 +1,13 @@
 import sys
 import argparse
 from test import test
-from En_De_code import encode, decode
+from En_De_code import huffman_encode, huffman_decode
 sys.dont_write_bytecode = True
 
 parser = argparse.ArgumentParser(
     prog='Lcode.py',
     description='file compressor and decompressor',
-    usage='python Lcode.py [OPTION...] [-i INPUT] [-o OUTPUT]'
+    usage='python Lcode.py [OPTION...]'
 )
 parser.add_argument('-i', '--input', type=str,
                     help='the absolute or relative path of the file to be processed')
@@ -39,10 +39,10 @@ try:
         exit(0)
     if args.Huffman:
         if args.compress:
-            encode(args.input, args.output)
+            huffman_encode(args.input, args.output)
             print("\033[0;32m \nthe {} has been compressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
         if args.decompress:
-            res = decode(args.input, args.output)
+            res = huffman_decode(args.input, args.output)
             if res == -1:
                 print("\033[0;33m\nthe file is not compressed with Lcode!\033[0m".format(args.input, args.output))
                 exit(0)

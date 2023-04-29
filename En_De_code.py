@@ -1,7 +1,7 @@
 from Huffman import Huffman
+from LZ78 import LZ78
 
-
-def encode(source_path, target_path):
+def huffman_encode(source_path, target_path):
     with open(source_path, 'rb') as fp_in:
         with open(target_path, 'wb') as fp_out:
             str_file = fp_in.read()
@@ -30,7 +30,7 @@ def encode(source_path, target_path):
             fp_out.write(write_buffer)
 
 
-def decode(source_path, target_path):
+def huffman_decode(source_path, target_path):
     with open(source_path, 'rb') as fp_in:
         with open(target_path, 'wb') as fp_out:
             tmp_buffer = fp_in.read()
@@ -59,3 +59,13 @@ def decode(source_path, target_path):
                 huffman = Huffman(str_bytes, huff_dic)
                 write_buffer = huffman.decode()
                 fp_out.write(write_buffer)
+
+
+def lz78_encode(source_path, target_path):
+    lz78 = LZ78(source_path, target_path)
+    lz78.encode()
+
+
+def lz78_decode(source_path, target_path):
+    lz78 = LZ78(source_path, target_path)
+    lz78.decode()
