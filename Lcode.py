@@ -1,5 +1,6 @@
 import sys
 import argparse
+from test import test
 from En_De_code import encode, decode
 sys.dont_write_bytecode = True
 
@@ -33,7 +34,7 @@ try:
     if not args.compress and not args.decompress and not args.hash_test:
         print("\033[0;31m [Lcode Error]Please choose the way to deal with the files!\033[0m")
         exit(0)
-    if not args.input:
+    if not args.input and not args.hash_test:
         print("\033[0;31m [Lcode Error]Please input the file that you want to compress or decompress!\033[0m")
         exit(0)
     if args.Huffman:
@@ -43,6 +44,8 @@ try:
         if args.decompress:
             res = decode(args.input, args.output)
             print("\033[0;32m\nthe {} has been decompressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
+    if args.hash_test:
+        test(args.hash_test[0], args.hash_test[1])
 
 except Exception as e:
     print(f"\033[0;31m [Lcode Error]{e}\033[0m")
