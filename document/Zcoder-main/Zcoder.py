@@ -6,6 +6,7 @@
 '''
 import sys
 sys.dont_write_bytecode = True
+from tqdm import tqdm
 from math import log
 from LZ import *
 from Huffman import *

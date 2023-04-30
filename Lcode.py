@@ -1,7 +1,7 @@
 import sys
 import argparse
 from test import test
-from En_De_code import huffman_encode, huffman_decode
+from En_De_code import huffman_encode, huffman_decode, lz78_decode, lz78_encode
 sys.dont_write_bytecode = True
 
 parser = argparse.ArgumentParser(
@@ -28,9 +28,6 @@ group2.add_argument('-T', '--hash_test', nargs=2, metavar=("file1", "file2"),
 
 try:
     args = parser.parse_args()
-    if not args.Huffman and not args.LZ and not args.hash_test:
-        print("\033[0;31m [Lcode Error]Please choose the method to deal with the files!\033[0m")
-        exit(0)
     if not args.compress and not args.decompress and not args.hash_test:
         print("\033[0;31m [Lcode Error]Please choose the way to deal with the files!\033[0m")
         exit(0)
@@ -47,8 +44,22 @@ try:
                 print("\033[0;33m\nthe file is not compressed with Lcode!\033[0m".format(args.input, args.output))
                 exit(0)
             print("\033[0;32m\nthe {} has been decompressed to {} with Huffman coding.\033[0m".format(args.input, args.output))
-    if args.hash_test:
+    elif args.LZ:
+        if args.compress:
+            lz78_encode(args.input, args.output)
+            print("\033[0;32m \nthe {} has been compressed to {} with LZ78 coding.\033[0m".format(args.input, args.output))
+        if args.decompress:
+            res = lz78_decode(args.input, args.output)
+            if res == -1:
+                print("\033[0;33m\nthe file is not compressed with Lcode!\033[0m".format(args.input, args.output))
+                exit(0)
+            print("\033[0;32m\nthe {} has been decompressed to {} with LZ78 coding.\033[0m".format(args.input, args.output))
+    elif args.hash_test:
         test(args.hash_test[0], args.hash_test[1])
+
+    else:
+        print("\033[0;31m [Lcode Error]Please choose the method to deal with the files!\033[0m")
+        exit(0)
 
 except Exception as e:
     print(f"\033[0;31m [Lcode Error]{e}\033[0m")

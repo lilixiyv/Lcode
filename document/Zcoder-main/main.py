@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 '''
-@File    :   Lcode.py
+@File    :   main.py
 @Time    :   2023/03/27 10:44:49
 @Author  :   zeroc 
 '''
@@ -36,9 +36,9 @@ print("\033[0;33m Welcome to Zcoder!!! \033[0m")
 print(banner)
 
 parser = argparse.ArgumentParser(
-    prog='Lcode.py',
+    prog='main.py',
     description='file compressor and decompressor',
-    usage='python Lcode.py [OPTION...] [-i INPUT] [-o OUTPUT]'
+    usage='python main.py [OPTION...] [-i INPUT] [-o OUTPUT]'
 )
 parser.add_argument('-i', '--input', type=str,
                     help='the absolute or relative path of the input file')
