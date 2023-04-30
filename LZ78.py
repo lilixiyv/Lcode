@@ -47,7 +47,7 @@ class LZ78:
     def decode(self):
         with open(self.input_path, "rb") as f_in, open(self.output_path, "wb") as f_out:
             str_file = f_in.read()
-            str_file = str_file[3:]
+            str_file = str_file[4:]
             len_file = len(str_file)
             dic_lz = {1: bytes([str_file[1]])}
             f_out.write(bytes([str_file[1]]))

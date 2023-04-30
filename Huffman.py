@@ -19,6 +19,8 @@ class Huffman:
         :param str_file: bytes; the data to deal with;
         :param huff_dic: dictionary; needed when decoding, the stand huffman dictionary
         """
+        if huff_dic is None:
+            huff_dic = {}
         self.str_file = str_file
         self.huff_dic = huff_dic
         self.fre_dic = {}
