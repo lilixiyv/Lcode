@@ -88,7 +88,6 @@ class Huffman:
             node2 = h_lst.pop()
             node1 = h_lst.pop()
 
-            # 使用其他方式
             len_h_lst -= 2
             tmp = HNode(None, node1.weight + node2.weight, node1, node2)
             if len_h_lst == 0:

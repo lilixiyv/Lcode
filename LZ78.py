@@ -19,35 +19,34 @@ class LZ78:
         with open(self.input_path, "rb") as f_in, open(self.output_path, "wb") as f_out:
             str_file = f_in.read()
             len_file = len(str_file)
-            dic_lz = {bytes([str_file[0]]): 0}  # 存字典时没有必要存最后一个字符
-            sub_dic = [bytes([str_file[0]])]
-            f_out.write(b'lxy')  # 标记自己的文档
+            dic_lz = {b'': 0}  # 存字典时没有必要存最后一个字符；key为当前字符串， value为最长前缀索引
+            sub_dic = [b'']  # 存索引与字符串关系
+            len_dic = 1
+            f_out.write(b'lxy')  # 标记文档
             f_out.write((0).to_bytes(1, byteorder='big'))
             f_out.write(bytes([str_file[0]]))
-            i = 1
+            i = 0
             while i < len_file:
-                len_dic = len(dic_lz)
                 l_num = int(log2(len_dic)/8) + 1
                 end_flag = 0  # 需要标记是否已经处理完
-                now = b''
-                pre = bytes([str_file[i]])
-                while pre in dic_lz:
+                pre = b''
+                next_bytes = bytes([str_file[i]])
+                while next_bytes in dic_lz:
                     i += 1
                     if i == len_file:
                         end_flag = 1
                         break
-                    now = pre
-                    pre += bytes([str_file[i]])
+                    pre = next_bytes
+                    next_bytes += bytes([str_file[i]])
                 if end_flag == 1:
-                    index = sub_dic.index(pre) + 1
+                    index = sub_dic.index(next_bytes)
                     f_out.write(index.to_bytes(l_num, 'big'))
                 else:
-                    if now == b'':
-                        index = 0
-                    else:
-                        index = sub_dic.index(now) + 1
-                    dic_lz[pre] = index
-                    sub_dic.append(pre)
+
+                    index = sub_dic.index(pre)
+                    dic_lz[next_bytes] = index
+                    len_dic += 1
+                    sub_dic.append(next_bytes)
                     f_out.write(index.to_bytes(l_num, 'big'))
                     f_out.write(bytes([str_file[i]]))
                     i += 1
@@ -70,10 +69,7 @@ class LZ78:
             if i + l_num >= len_file:
                 index = int.from_bytes(str_file[i:len_file], 'big')
                 last_char = b''
-                print(i + l_num == len_file)
-                print(str_file[i:len_file])
                 i += l_num
-                print(index)
 
             else:
                 index = int.from_bytes(str_file[i:i+l_num], 'big')
