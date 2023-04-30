@@ -24,6 +24,28 @@ class Huffman:
         self.fre_dic = {}
 
     @classmethod
+    def huff_dic_buffer(cls, huff_dic):
+        """
+        build the code_data to convert the information about huffman code
+        :param huff_dic: dictionary; the stand huffman dictionary that has been built
+        :return: code_data: bytes;
+        """
+        max_length = 0
+        for code in huff_dic.values():
+            max_length = max(max_length, len(code))
+        length_lst = [0 for _ in range(max_length + 1)]
+        for code in huff_dic.values():
+            length_lst[len(code)] += 1
+        # 要是256个字符全部位于同一层，使用全零标记
+        if length_lst[max_length] == 256:
+            length_lst[max_length] = 0
+        length_lst.pop(0)  # 码长为0的字符并不存在，故删去
+        code_bytes = b''.join(huff_dic.keys())  # 将所有字符按顺序（码长）存储
+        length_bytes = b''.join(map(lambda x: bytes([x]), length_lst))  # 从码长为1开始，存每个码长对应的同码长字符数
+        code_data = bytes([max_length]) + length_bytes + code_bytes
+        return code_data
+
+    @classmethod
     def rebuild(cls, v_lst, l_lst) -> dict:
         """
         rebuild the stand huffman dic
@@ -32,12 +54,10 @@ class Huffman:
         :return: re_huff_dic: the huffman tree
         """
         re_huff_dic = {value: '' for value in v_lst}
+        re_huff_dic[v_lst[0]] = bin(0)[2:].rjust(l_lst[0], '0')
         pre = 0
-        for i in range(len(v_lst)):
-            if i == 0:
-                pre = 0
-            else:
-                pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])
+        for i in range(1, len(v_lst)):
+            pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])
             re_huff_dic[v_lst[i]] = bin(pre)[2:].rjust(l_lst[i], '0')
         return re_huff_dic
 
@@ -134,7 +154,6 @@ class Huffman:
             while len(bin_buffer) >= 8:
                 write_buffer.append(int(bin_buffer[:8], 2))
                 bin_buffer = bin_buffer[8:]
-        # 将缓冲区内的数据填充后输出
         # 在最后一个字节使用一个1和若干0填充,若最后正好无多余，则要填充一个字节
         bin_buffer += '1'
         bin_buffer = bin_buffer.ljust(8, '0')
@@ -168,7 +187,7 @@ class Huffman:
             else:
                 break
         read_buffer = read_buffer[0: buffer_size - padding_len]
-        buffer_size = buffer_size - padding_len  # 得到字符串二进制长度以及二进制串
+        buffer_size = buffer_size - padding_len
         write_buffer = bytearray([])
         current = node_lst[0]
         for pos in range(0, buffer_size, 8):

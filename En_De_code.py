@@ -8,25 +8,10 @@ def huffman_encode(source_path, target_path):
         if not str_file:  # 若为空文件，直接返回空文件
             return
         huffman = Huffman(str_file)
-
         write_buffer, huff_dic = huffman.encode()
-
-        max_length = 0
-        for code in huff_dic.values():
-            max_length = max(max_length, len(code))
-        length_lst = [0 for _ in range(max_length + 1)]
-        for code in huff_dic.values():
-            length_lst[len(code)] += 1
-        # 要是256个字符全部位于同一层，使用全零标记
-        if length_lst[max_length] == 256:
-            length_lst[max_length] = 0
-        length_lst.pop(0)  # 码长为0的字符并不存在，故删去
-        code_bytes = b''.join(huff_dic.keys())  # 将所有字符按顺序（码长）存储
-        length_bytes = b''.join(map(lambda x: bytes([x]), length_lst))  # 从码长为1开始，存每个码长对应的同码长字符数
-        code_data = bytes([max_length]) + length_bytes + code_bytes
+        code_data = Huffman.huff_dic_buffer(huff_dic)
         write_buffer = code_data + write_buffer
         write_buffer = b'lxy' + write_buffer
-
         fp_out.write(write_buffer)
 
 

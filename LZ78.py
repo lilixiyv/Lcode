@@ -2,6 +2,10 @@ from math import log2
 
 
 class LZ78:
+    """
+    realize the encoding and decoding of LZ78 code
+    need the path of input and output file
+    """
     def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
