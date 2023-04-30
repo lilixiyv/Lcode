@@ -6,23 +6,13 @@ class LZ78:
         self.input_path = input_path
         self.output_path = output_path
 
-    @staticmethod
-    def _max_find(bts, dic):
-        i = 1
-        for key in dic:
-            if bts == key:
-                return i
-            i += 1
-        return -1
-
     def encode(self):
-        with open(self.input_path, "rb") as f_in, open(self.output_path, "wb") as f_out:
+        with open(self.input_path, "rb") as f_in, open(self.output_path, "ab") as f_out:
             str_file_in = f_in.read()
             str_file = [bytes([c]) for c in str_file_in]
             dic_lz = {b'': 0}  # 存字典时没有必要存最后一个字符；key为当前字符串， value为最长前缀索引
             sub_dic = {b'': 0}  # 存索引与字符串关系
             len_dic = 1
-            f_out.write(b'lxy')  # 标记文档
 
             dic_lz[str_file[0]] = 0
             sub_dic[str_file[0]] = 1
@@ -51,34 +41,30 @@ class LZ78:
                 f_out.write(index.to_bytes(l_num, 'big'))
 
     def decode(self):
-        str_file = open(self.input_path, "rb").read()
-        f_out = open(self.output_path, "wb")
-        my_file = str_file[:3]
-        str_file = str_file[3:]
-        len_file = len(str_file)
-        if my_file != b'lxy':
-            return -1
-        dic_lz = {1: bytes([str_file[1]])}
-        f_out.write(bytes([str_file[1]]))
-        i = 2
-        while i < len_file:
-            len_dic = len(dic_lz)
+        with open(self.input_path, "rb") as f_in, open(self.output_path, "wb") as f_out:
+            str_file = f_in.read()
+            str_file = str_file[3:]
+            len_file = len(str_file)
+            dic_lz = {1: bytes([str_file[1]])}
+            f_out.write(bytes([str_file[1]]))
+            i = 2
+            while i < len_file:
+                len_dic = len(dic_lz)
+                l_num = int(log2(len_dic) / 8) + 1
+                if i + l_num >= len_file:
+                    index = int.from_bytes(str_file[i:len_file], 'big')
+                    last_char = b''
+                    i += l_num
 
-            l_num = int(log2(len_dic) / 8) + 1
-            if i + l_num >= len_file:
-                index = int.from_bytes(str_file[i:len_file], 'big')
-                last_char = b''
-                i += l_num
-
-            else:
-                index = int.from_bytes(str_file[i:i+l_num], 'big')
-                last_char = bytes([str_file[i+l_num]])
-                i += (l_num+1)
-            if index == 0:
-                dic_lz[len_dic+1] = last_char
-                f_out.write(last_char)
-            else:
-                before = dic_lz[index]
-                bs = before + last_char
-                dic_lz[len_dic+1] = bs
-                f_out.write(bs)
+                else:
+                    index = int.from_bytes(str_file[i:i+l_num], 'big')
+                    last_char = bytes([str_file[i+l_num]])
+                    i += (l_num+1)
+                if index == 0:
+                    dic_lz[len_dic+1] = last_char
+                    f_out.write(last_char)
+                else:
+                    before = dic_lz[index]
+                    bs = before + last_char
+                    dic_lz[len_dic+1] = bs
+                    f_out.write(bs)

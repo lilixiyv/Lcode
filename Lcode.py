@@ -6,7 +6,7 @@ sys.dont_write_bytecode = True
 
 parser = argparse.ArgumentParser(
     prog='Lcode.py',
-    description='file compressor and decompressor',
+    description='file compressor and decompressor, using Huffman code or LZ78 code',
     usage='python Lcode.py [OPTION...]'
 )
 parser.add_argument('-i', '--input', type=str,

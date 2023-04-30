@@ -17,7 +17,7 @@ class Huffman:
         """
         build the parameter needed in Huffman code
         :param str_file: bytes; the data to deal with;
-        :param huff_dic:
+        :param huff_dic: dictionary; needed when decoding, the stand huffman dictionary
         """
         self.str_file = str_file
         self.huff_dic = huff_dic
@@ -37,8 +37,8 @@ class Huffman:
             if i == 0:
                 pre = 0
             else:
-                pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])  # 核心构建思路，同一层就靠加，不同层就要左移对应位数
-            re_huff_dic[v_lst[i]] = bin(pre)[2:].rjust(l_lst[i], '0')  # 以零来填充不满的位数
+                pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])
+            re_huff_dic[v_lst[i]] = bin(pre)[2:].rjust(l_lst[i], '0')
         return re_huff_dic
 
     def _fre_count(self):
@@ -50,7 +50,7 @@ class Huffman:
         for item in self.str_file:
             cha_fre[item] += 1
         for i in range(256):
-            if cha_fre[i] != 0:  # 非0才有统计必要
+            if cha_fre[i] != 0:
                 self.fre_dic[bytes([i])] = cha_fre[i]
 
     def _tree_build(self):
@@ -74,14 +74,14 @@ class Huffman:
                     rec_code(pre.r_child, code + '1')
 
         self._fre_count()
-        if not self.fre_dic:  # 没有字符的情况；
+        if not self.fre_dic:  # 没有字符
             return
-        elif len(self.fre_dic) == 1:  # 仅有一个字符；
+        elif len(self.fre_dic) == 1:  # 仅有一个字符
             for value in self.fre_dic.keys():
                 self.huff_dic[value] = '0'
             return
         h_lst = [HNode(value, weight, None, None) for value, weight in self.fre_dic.items()]
-        h_lst.sort(key=lambda x: x.weight, reverse=True)  # 降序排序，方便插入
+        h_lst.sort(key=lambda x: x.weight, reverse=True)
 
         len_h_lst = len(h_lst)
         while len_h_lst > 1:
@@ -108,38 +108,34 @@ class Huffman:
         """
         v_lst, l_lst = [], []
         lst = [(value, len(code)) for value, code in self.huff_dic.items()]
-        lst.sort(key=lambda x: (x[1], x[0]), reverse=False)  # 通过长度先排序，再通过asc值排序，将长且值大的放后边
+        lst.sort(key=lambda x: (x[1], x[0]), reverse=False)
         for value, length in lst:
             v_lst.append(value)
             l_lst.append(length)
         self.huff_dic = {value: '' for value in v_lst}
         pre = 0
-        for i in range(len(v_lst)):
-            if i == 0:
-                pre = 0
-            else:
-                pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])  # 核心构建思路，同一层就靠加，不同层就要左移对应位数
-            self.huff_dic[v_lst[i]] = bin(pre)[2:].rjust(l_lst[i], '0')  # 以零来填充不满的位数
+        self.huff_dic[v_lst[0]] = bin(pre)[2:].rjust(l_lst[0], '0')
+        for i in range(1, len(v_lst)):
+            pre = (pre + 1) << (l_lst[i] - l_lst[i - 1])
+            self.huff_dic[v_lst[i]] = bin(pre)[2:].rjust(l_lst[i], '0')
 
     def encode(self):
         """
-        encode: one of the main function of Huffman;
+        encode: one of the main function of Huffman; use one '1' and several '0' to padding;
         :return: the data of the result of decompression and the huffman dictionary
         """
         self._tree_build()
         self.stand_huff()
 
         bin_buffer = ''
-        # 直接查找写入
         write_buffer = bytearray([])
-        # 循环读入数据，同时编码输出
         for item in self.str_file:
             bin_buffer = bin_buffer + self.huff_dic[bytes([item])]
             while len(bin_buffer) >= 8:
                 write_buffer.append(int(bin_buffer[:8], 2))
                 bin_buffer = bin_buffer[8:]
         # 将缓冲区内的数据填充后输出
-        # 在最后一个字节使用一个1和若干0填充
+        # 在最后一个字节使用一个1和若干0填充,若最后正好无多余，则要填充一个字节
         bin_buffer += '1'
         bin_buffer = bin_buffer.ljust(8, '0')
         write_buffer.append(int(bin_buffer, 2))
@@ -147,7 +143,7 @@ class Huffman:
         return bytes(write_buffer), self.huff_dic
 
     def decode(self):
-        if not self.huff_dic:  # 空字典，直接返回
+        if not self.huff_dic:  # 空字典
             return b''
         elif len(self.huff_dic) == 1:  # 字典长度为1，为了保证鲁棒性添加冗余
             self.huff_dic[b'lxy'] = 'lxy'
