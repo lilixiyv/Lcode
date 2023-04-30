@@ -17,44 +17,38 @@ class LZ78:
 
     def encode(self):
         with open(self.input_path, "rb") as f_in, open(self.output_path, "wb") as f_out:
-            str_file = f_in.read()
-            len_file = len(str_file)
+            str_file_in = f_in.read()
+            str_file = [bytes([c]) for c in str_file_in]
             dic_lz = {b'': 0}  # 存字典时没有必要存最后一个字符；key为当前字符串， value为最长前缀索引
-            sub_dic = [b'']  # 存索引与字符串关系
+            sub_dic = {b'': 0}  # 存索引与字符串关系
             len_dic = 1
             f_out.write(b'lxy')  # 标记文档
 
-            dic_lz[bytes([str_file[0]])] = 0
-            sub_dic.append(bytes([str_file[0]]))
+            dic_lz[str_file[0]] = 0
+            sub_dic[str_file[0]] = 1
             len_dic += 1
             f_out.write((0).to_bytes(1, byteorder='big'))
-            f_out.write(bytes([str_file[0]]))
+            f_out.write(str_file[0])
+            str_file = str_file[1:]
 
-            i = 1
-            while i < len_file:
-                l_num = int(log2(len_dic-1) / 8) + 1
-                end_flag = 0  # 需要标记是否已经处理完
-                pre = b''
-                next_bytes = bytes([str_file[i]])
-                while next_bytes in dic_lz:
-                    i += 1
-                    if i == len_file:
-                        end_flag = 1
-                        break
-                    pre = next_bytes
-                    next_bytes += bytes([str_file[i]])
-                if end_flag == 1:
-                    index = sub_dic.index(next_bytes)
-                    f_out.write(index.to_bytes(l_num, 'big'))
-                else:
-
-                    index = sub_dic.index(pre)
+            pre = b""
+            for c in str_file:
+                next_bytes = pre + c
+                if next_bytes not in dic_lz:
+                    l_num = int(log2(len_dic - 1) / 8) + 1
+                    index = sub_dic[pre]
                     dic_lz[next_bytes] = index
+                    sub_dic[next_bytes] = len_dic
                     len_dic += 1
-                    sub_dic.append(next_bytes)
                     f_out.write(index.to_bytes(l_num, 'big'))
-                    f_out.write(bytes([str_file[i]]))
-                    i += 1
+                    f_out.write(c)
+                    pre = b''
+                else:
+                    pre = next_bytes
+            if pre != b'':
+                l_num = int(log2(len_dic - 1) / 8) + 1
+                index = sub_dic[pre]
+                f_out.write(index.to_bytes(l_num, 'big'))
 
     def decode(self):
         str_file = open(self.input_path, "rb").read()
