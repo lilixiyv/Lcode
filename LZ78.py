@@ -23,11 +23,16 @@ class LZ78:
             sub_dic = [b'']  # 存索引与字符串关系
             len_dic = 1
             f_out.write(b'lxy')  # 标记文档
+
+            dic_lz[bytes([str_file[0]])] = 0
+            sub_dic.append(bytes([str_file[0]]))
+            len_dic += 1
             f_out.write((0).to_bytes(1, byteorder='big'))
             f_out.write(bytes([str_file[0]]))
-            i = 0
+
+            i = 1
             while i < len_file:
-                l_num = int(log2(len_dic)/8) + 1
+                l_num = int(log2(len_dic-1) / 8) + 1
                 end_flag = 0  # 需要标记是否已经处理完
                 pre = b''
                 next_bytes = bytes([str_file[i]])
